@@ -1,0 +1,72 @@
+.container h2 {
+  font-size: 1.375em;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.container h3 {
+  font-size: 1.25em;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.container h4 {
+  font-size: 1.125em;
+  font-weight: 600;
+  margin-bottom: 1em;
+}
+
+.container :where(ul, ol) {
+  padding-left: 1.5em;
+}
+
+.container table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #909090;
+  margin-bottom: 1em;
+}
+
+.container th,
+.container td {
+  padding: 0.5em;
+  border: 1px solid #909090;
+}
+
+.container th {
+  background-color: #303030;
+  font-weight: 600;
+}
+
+@media screen and (min-width: 1400px) {
+  .container {
+    font-size: 18px;
+  }
+}
+@media screen and (max-width: 1399px) {
+  .container {
+    font-size: 16px;
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .container {
+    font-size: 16px;
+  }
+}
+
+.container :global(.text-tiny) {
+  font-size: 0.7em;
+}
+
+.container :global(.text-small) {
+  font-size: 0.85em;
+}
+
+.container :global(.text-big) {
+  font-size: 1.4em;
+}
+
+.container :global(.text-huge) {
+  font-size: 1.8em;
+}

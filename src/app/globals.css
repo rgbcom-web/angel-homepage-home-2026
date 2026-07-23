@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* 서체 */
+  --font-primary: var(--font-pretendard);
+
+  /* 컬러 팔레트 */
+  --blue: 221 100% 63%;
+  --blue-light: 221 100% 70%;
+  --blue-lighter: 221 98% 74%;
+  --navy: 240 100% 14%;
+  --mint: 180 91% 41%;
+  --orange: 22 82% 60%;
+  --gray-dark: 0 0% 54%;
+  --gray-darker: 0 0% 20%;
+  --gray: 0 0% 64%;
+  --gray-light: 0 0% 75%;
+  --gray-lighter: 0 0% 96%;
+  --gray-blue: 234 10% 50%;
+  --pink: 330 84% 60%;
+  --text-foreground: 0 0% 28%;
+  --dark-background: 0 0% 9%;
+
+  /* 컬러팔레트 (shadcn/ui) */
+  --destructive: 0 84.2% 65.2%;
+  --destructive-light: 0 84% 80%;
+  --destructive-bg: 0 84% 98%;
+  --destructive-foreground: 0 0% 98%;
+  --input: 0 0% 89.8%;
+  --border: 0 0% 89.8%;
+
+  /* 스크롤바 커스텀 */
+  --scroll-bar-width: 5px;
+  --scroll-bar-background: #dfdfdf;
+  --scroll-bar-thumb-color: hsl(var(--mint));
+
+  /* 컨테이너 사이즈 */
+  --container-narrower: 1000px;
+  --container-narrow: 1200px;
+  --container: 1400px;
+  --container-wide: 1580px;
+  --container-full: 100%;
+
+  /* 애니메이션 easing */
+  --easing-pop: cubic-bezier(0.85, 0.14, 0.29, 0.99);
+
+  /* 고정 네비게이션 영역 z-index */
+  --fixed-navigation-z-index: 50;
+}
+
+::-webkit-scrollbar {
+  width: var(--scroll-bar-width);
+  height: var(--scroll-bar-width);
+  background: var(--scroll-bar-background);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--scroll-bar-thumb-color);
+}
+
+.gray-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--gray));
+}
+
+html,
+body {
+  font-family: var(--font-primary);
+  line-height: 1.8;
+  word-break: keep-all;
+}
+
+html:has(.custom-scroll-progressbar),
+body:has(.custom-scroll-progressbar) {
+  --scroll-bar-width: 0px;
+}
+
+strong, b {
+  font-weight: bold;
+}
+
+.mask-image-guage {
+  -webkit-mask-image: url('/images/products/angel-suit/h10/feature-1-guage.svg');
+  mask-image: url('/images/products/angel-suit/h10/feature-1-guage.svg');
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+}
+
+/* Pediatric KOL Portal - 보안 뷰어 인쇄 제한 */
+@media print {
+  body.pediatric-secure-viewer * {
+    display: none !important;
+  }
+  body.pediatric-secure-viewer::after {
+    content: "인쇄가 제한된 자료입니다.";
+    display: block !important;
+    padding: 40px;
+    font-size: 18px;
+  }
+}

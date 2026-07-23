@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="51.73" height="26.096" viewBox="0 0 51.73 26.096">
+  <defs>
+    <linearGradient id="linear-gradient" x1="0.11" y1="1.052" x2="0.842" y2="0.257" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#427dff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#427dff"/>
+    </linearGradient>
+  </defs>
+  <path id="Ellipse_670_Stroke_" data-name="Ellipse 670 (Stroke)" d="M2.293,26.073a.6.6,0,0,1-.724-.342L.042,21.292a.508.508,0,0,1,.385-.644.6.6,0,0,1,.724.342l1.126,3.272A45.236,45.236,0,0,1,22.5,7.4,52.242,52.242,0,0,1,49.9,3.615L47.7.812a.48.48,0,0,1,.142-.718.627.627,0,0,1,.808.127l3,3.8a.481.481,0,0,1-.142.718L47.222,7.4a.628.628,0,0,1-.808-.127.481.481,0,0,1,.143-.718l3.1-1.932a50.95,50.95,0,0,0-26.648,3.7A44.131,44.131,0,0,0,3.323,24.715l3.624-.985a.6.6,0,0,1,.724.342.508.508,0,0,1-.385.644Z" transform="translate(-0.016 0)" fill-rule="evenodd" fill="url(#linear-gradient)"/>
+</svg>

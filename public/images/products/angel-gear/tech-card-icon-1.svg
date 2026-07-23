@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="110" height="102" viewBox="0 0 110 102">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="사각형_32851" data-name="사각형 32851" width="110" height="102" transform="translate(471 3986)" fill="red" stroke="#707070" stroke-width="1" opacity="0.447"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <rect id="사각형_32710" data-name="사각형 32710" width="92.519" height="88.772" fill="none" stroke="#fff" stroke-width="1"/>
+    </clipPath>
+    <linearGradient id="linear-gradient" x1="0.702" y1="0.609" x2="0.062" y2="0.579" gradientUnits="objectBoundingBox">
+      <stop offset="0" stop-color="#cbcbcb"/>
+      <stop offset="1" stop-color="#bfbfbf" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g id="마스크_그룹_703" data-name="마스크 그룹 703" transform="translate(-471 -3986)" clip-path="url(#clip-path)">
+    <g id="그룹_20945" data-name="그룹 20945" transform="translate(473.404 3991)">
+      <g id="그룹_20943" data-name="그룹 20943" transform="translate(75.748 41.129)">
+        <ellipse id="타원_792" data-name="타원 792" cx="12.474" cy="12.474" rx="12.474" ry="12.474" transform="translate(0)" fill="#ee7b3a" opacity="0.39"/>
+        <ellipse id="타원_797" data-name="타원 797" cx="8.483" cy="8.483" rx="8.483" ry="8.483" transform="translate(3.992 3.992)" fill="#ee7b3a"/>
+      </g>
+      <g id="그룹_20944" data-name="그룹 20944" transform="translate(48.803 61.088)">
+        <ellipse id="타원_792-2" data-name="타원 792" cx="9.48" cy="9.481" rx="9.48" ry="9.481" transform="translate(0)" fill="#ee7b3a" opacity="0.39"/>
+        <ellipse id="타원_797-2" data-name="타원 797" cx="6.487" cy="6.487" rx="6.487" ry="6.487" transform="translate(2.994 2.994)" fill="#ee7b3a"/>
+      </g>
+      <g id="그룹_20939" data-name="그룹 20939" transform="translate(0 6.7)">
+        <g id="그룹_20938" data-name="그룹 20938" transform="translate(0 0)" clip-path="url(#clip-path-2)">
+          <path id="패스_11926" data-name="패스 11926" d="M68.824,41.594v19H29.636V30.761H49.229" transform="translate(-25.097 15.573)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <path id="패스_11927" data-name="패스 11927" d="M25.554,9.584A8.583,8.583,0,1,0,34.138,1,8.584,8.584,0,0,0,25.554,9.584Z" transform="translate(9.589 5.535)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <path id="패스_11928" data-name="패스 11928" d="M16.278,30.548,6.992,32.405C3.7,33.064,1,35.666,1,38.188S3.735,42.5,7.08,42.162l15.351-1.946a8.084,8.084,0,0,0,4.709-3.044l4.416-6.625,9.168,9.167L30.41,52.609a5.978,5.978,0,0,0-.836,5.246l5.949,15.863a7.032,7.032,0,0,0,8.074,4.24l.365-.091a5.584,5.584,0,0,0,4-7.28L43.78,58.05S56.141,45.982,57.505,44.38a7.746,7.746,0,0,0,1.555-4.665,9.254,9.254,0,0,0-2.448-6.609c-3.055-3.057-14.588-12.129-21.318-17.553-6.8-5.483-11.683-1-13.514,2.658s-5.5,12.338-5.5,12.338" transform="translate(28.918 8.081)" fill="none" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/>
+          <line id="선_1447" data-name="선 1447" y2="14.969" transform="translate(33.335 55.885)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2"/>
+          <line id="선_1448" data-name="선 1448" y2="18.184" transform="translate(23.371 52.671)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2"/>
+          <line id="선_1449" data-name="선 1449" y2="18.184" transform="translate(13.406 52.671)" fill="none" stroke="#fff" stroke-linecap="round" stroke-width="2"/>
+        </g>
+      </g>
+      <path id="합치기_64" data-name="합치기 64" d="M27.368,9.317H0v14.95H27.368v8.666l15.67-16.466L27.368,0Z" transform="translate(55.289 43.038) rotate(-90)" opacity="0.46" fill="url(#linear-gradient)"/>
+    </g>
+  </g>
+</svg>
