@@ -232,8 +232,22 @@ function UpcomingCarousel({ events }) {
     }
   };
 
+  const resetDrag = (blockClick = false) => {
+    dragRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      delta: 0,
+      dragging: false,
+      moved: blockClick,
+    };
+  };
+
   const onPointerDown = (e) => {
-    if (!isCarousel || step <= 0 || e.button !== 0) return;
+    if (!isCarousel || step <= 0) return;
+    // 마우스 왼쪽 / 터치 / 펜만
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+
     dragRef.current = {
       pointerId: e.pointerId,
       startX: e.clientX,
@@ -252,17 +266,23 @@ function UpcomingCarousel({ events }) {
     const dy = e.clientY - drag.startY;
 
     if (!drag.dragging) {
-      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
       // 세로 스크롤이면 드래그 포기
       if (Math.abs(dy) > Math.abs(dx)) {
-        drag.pointerId = null;
+        resetDrag(false);
         return;
       }
       drag.dragging = true;
       drag.moved = true;
       setIsDragging(true);
-      trackRef.current?.setPointerCapture?.(e.pointerId);
+      try {
+        trackRef.current?.setPointerCapture?.(e.pointerId);
+      } catch {
+        /* ignore */
+      }
     }
+
+    e.preventDefault();
 
     let nextDelta = dx;
     if (activeIndex === 0 && nextDelta > 0) nextDelta *= 0.35;
@@ -276,25 +296,28 @@ function UpcomingCarousel({ events }) {
     const drag = dragRef.current;
     if (!drag || drag.pointerId !== e.pointerId) return;
 
-    if (drag.dragging) {
-      endDrag(drag.delta);
+    const wasDragging = drag.dragging;
+    const delta = drag.delta;
+    const shouldBlockClick = drag.moved;
+
+    if (wasDragging) {
       try {
         trackRef.current?.releasePointerCapture?.(e.pointerId);
       } catch {
         /* already released */
       }
+      endDrag(delta);
     }
 
     // 짧은 탭은 Link 클릭 유지, 드래그면 클릭 차단
-    const shouldBlockClick = drag.moved;
-    dragRef.current = {
-      pointerId: null,
-      startX: 0,
-      startY: 0,
-      delta: 0,
-      dragging: false,
-      moved: shouldBlockClick,
-    };
+    resetDrag(shouldBlockClick);
+  };
+
+  const onLostPointerCapture = (e) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+    if (drag.dragging) endDrag(drag.delta);
+    else resetDrag(drag.moved);
   };
 
   const onClickCapture = (e) => {
@@ -302,6 +325,11 @@ function UpcomingCarousel({ events }) {
     e.preventDefault();
     e.stopPropagation();
     dragRef.current.moved = false;
+  };
+
+  // PC에서 링크/이미지 네이티브 드래그로 캐러셀이 먹히는 것 방지
+  const onNativeDragStart = (e) => {
+    e.preventDefault();
   };
 
   const cardStyle =
@@ -349,16 +377,19 @@ function UpcomingCarousel({ events }) {
             <div
               ref={trackRef}
               className={cn(
-                "overflow-hidden touch-pan-y select-none",
+                "overflow-hidden select-none",
                 isDragging ? "cursor-grabbing" : "cursor-grab",
               )}
               style={{
                 width: layout.viewportWidth > 0 ? layout.viewportWidth : "100%",
+                touchAction: "pan-y",
               }}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
               onPointerCancel={onPointerUp}
+              onLostPointerCapture={onLostPointerCapture}
+              onDragStart={onNativeDragStart}
               onClickCapture={onClickCapture}>
               <div
                 className={cn(
@@ -374,6 +405,7 @@ function UpcomingCarousel({ events }) {
                     event={event}
                     variant="upcoming"
                     style={cardStyle}
+                    draggable={false}
                   />
                 ))}
               </div>
@@ -412,7 +444,7 @@ function UpcomingCarousel({ events }) {
   );
 }
 
-function EventCard({ event, variant = "upcoming", style, className }) {
+function EventCard({ event, variant = "upcoming", style, className, draggable }) {
   const isPast = variant === "past";
   const muted = isPast ? "text-[#94A3B8]" : "text-[#475569]";
   const titleColor = isPast ? "text-[#64748B]" : "text-[#0F172A]";
@@ -421,6 +453,8 @@ function EventCard({ event, variant = "upcoming", style, className }) {
     <Link
       href={`/pediatric/events/${event.id}`}
       data-event-card={!isPast || undefined}
+      draggable={draggable}
+      onDragStart={draggable === false ? (e) => e.preventDefault() : undefined}
       style={isPast ? undefined : style}
       className={cn(
         "flex overflow-hidden rounded-2xl border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.02)] transition-shadow hover:shadow-md",
