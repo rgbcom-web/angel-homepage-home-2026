@@ -25,6 +25,7 @@ export function EventDetailPage({ event }) {
   }
 
   const upcoming = isUpcomingEvent(event);
+  const images = Array.isArray(event.images) ? event.images.filter((item) => item?.url) : [];
 
   return (
     <PortalContentFrame>
@@ -67,8 +68,32 @@ export function EventDetailPage({ event }) {
         </p>
 
         {event.description && (
-          <div className={cn("mt-8 border-t border-[#F1F5F9] pt-6 text-[15px] leading-relaxed text-[#334155]")}>
+          <div
+            className={cn(
+              "mt-8 whitespace-pre-wrap border-t border-[#F1F5F9] pt-6 text-[15px] leading-relaxed text-[#334155]",
+            )}>
             {event.description}
+          </div>
+        )}
+
+        {images.length > 0 && (
+          <div
+            className={cn(
+              "mt-8 flex flex-col gap-4",
+              event.description ? "" : "border-t border-[#F1F5F9] pt-6",
+            )}>
+            {images.map((image, index) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={`${image.path || image.url}-${index}`}
+                src={image.url}
+                alt={image.name || `${event.title} 이미지 ${index + 1}`}
+                className={cn(
+                  "h-auto w-full rounded-xl border border-[#E2E8F0] object-contain",
+                  "max-h-[720px] bg-[#F8FAFC]",
+                )}
+              />
+            ))}
           </div>
         )}
       </article>

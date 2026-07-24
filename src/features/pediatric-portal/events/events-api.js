@@ -4,6 +4,10 @@ import { createAdminClient } from "@/service/db/supabase/server";
 import { MOCK_EVENTS } from "./events-data";
 
 function mapEventRow(row) {
+  const images = Array.isArray(row.images)
+    ? row.images.filter((item) => item?.url)
+    : [];
+
   return {
     id: row.id,
     year: row.year || Number(String(row.start_date || "").slice(0, 4)),
@@ -14,6 +18,7 @@ function mapEventRow(row) {
     subtitle: row.subtitle || "",
     location: row.location || "",
     description: row.description || "",
+    images,
     showInNotice: Boolean(row.show_in_notice),
   };
 }

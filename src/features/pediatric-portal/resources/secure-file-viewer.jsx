@@ -155,7 +155,7 @@ export function SecureFileViewer({ resource }) {
 }
 
 function WatermarkOverlay({ text }) {
-  const tiles = Array.from({ length: 48 });
+  const tiles = Array.from({ length: 24 });
 
   return (
     <div
@@ -163,16 +163,17 @@ function WatermarkOverlay({ text }) {
       aria-hidden>
       <div
         className={cn(
-          "absolute inset-[-35%] grid rotate-[-28deg] grid-cols-3 gap-x-6 gap-y-14",
+          "absolute inset-[-40%] grid rotate-[-28deg] grid-cols-2 gap-x-28 gap-y-36",
+          "mobile:gap-x-16 mobile:gap-y-24",
         )}>
         {tiles.map((_, i) => (
           <span
             key={i}
             className={cn(
-              "whitespace-nowrap text-center text-[28px] font-bold tracking-wide",
-              "mobile:text-[22px]",
-              "text-black/[0.08]",
-              "[text-shadow:0_0_1px_rgba(255,255,255,0.35)]",
+              "whitespace-nowrap text-center text-[32px] font-bold tracking-wide",
+              "mobile:text-[24px]",
+              "text-black/[0.07]",
+              "[text-shadow:0_0_1px_rgba(255,255,255,0.32)]",
             )}>
             {text}
           </span>
