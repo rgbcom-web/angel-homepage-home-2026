@@ -10,6 +10,13 @@ import {
   isUpcomingEvent,
 } from "./events-data";
 
+function isPdfAttachment(item) {
+  if (!item) return false;
+  if (item.type === "pdf") return true;
+  const name = String(item.name || item.path || "").toLowerCase();
+  return name.endsWith(".pdf");
+}
+
 export function EventDetailPage({ event }) {
   if (!event) {
     return (
@@ -25,7 +32,9 @@ export function EventDetailPage({ event }) {
   }
 
   const upcoming = isUpcomingEvent(event);
-  const images = Array.isArray(event.images) ? event.images.filter((item) => item?.url) : [];
+  const attachments = Array.isArray(event.images)
+    ? event.images.filter((item) => item?.url)
+    : [];
 
   return (
     <PortalContentFrame>
@@ -76,24 +85,47 @@ export function EventDetailPage({ event }) {
           </div>
         )}
 
-        {images.length > 0 && (
+        {attachments.length > 0 && (
           <div
             className={cn(
               "mt-8 flex flex-col gap-4",
               event.description ? "" : "border-t border-[#F1F5F9] pt-6",
             )}>
-            {images.map((image, index) => (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                key={`${image.path || image.url}-${index}`}
-                src={image.url}
-                alt={image.name || `${event.title} 이미지 ${index + 1}`}
-                className={cn(
-                  "h-auto w-full rounded-xl border border-[#E2E8F0] object-contain",
-                  "max-h-[720px] bg-[#F8FAFC]",
-                )}
-              />
-            ))}
+            {attachments.map((file, index) => {
+              const isPdf = isPdfAttachment(file);
+              if (isPdf) {
+                return (
+                  <div
+                    key={`${file.path || file.url}-${index}`}
+                    className={cn("overflow-hidden rounded-xl border border-[#E2E8F0] bg-[#F8FAFC]")}>
+                    <div
+                      className={cn(
+                        "border-b border-[#E2E8F0] bg-white px-3 py-2 text-xs font-medium text-[#64748B]",
+                      )}>
+                      {file.name || `PDF ${index + 1}`}
+                    </div>
+                    <iframe
+                      title={file.name || `${event.title} PDF ${index + 1}`}
+                      src={`${file.url}#toolbar=0&navpanes=0`}
+                      className={cn("h-[70vh] min-h-[480px] w-full border-0 bg-white")}
+                    />
+                  </div>
+                );
+              }
+
+              return (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  key={`${file.path || file.url}-${index}`}
+                  src={file.url}
+                  alt={file.name || `${event.title} 이미지 ${index + 1}`}
+                  className={cn(
+                    "h-auto w-full rounded-xl border border-[#E2E8F0] object-contain",
+                    "max-h-[720px] bg-[#F8FAFC]",
+                  )}
+                />
+              );
+            })}
           </div>
         )}
       </article>

@@ -13,6 +13,13 @@ const EVENT_IMAGE_BUCKET_CANDIDATES = [
 ];
 const EVENT_IMAGE_SIGNED_TTL = 60 * 60; // 1h
 
+function resolveAttachmentType(fileName = "", explicitType) {
+  if (explicitType === "pdf" || explicitType === "image") return explicitType;
+  const lower = String(fileName || "").toLowerCase();
+  if (lower.endsWith(".pdf")) return "pdf";
+  return "image";
+}
+
 function normalizeEventImages(value) {
   if (!value) return [];
   if (Array.isArray(value)) return value.filter((item) => item?.url || item?.path);
@@ -33,6 +40,8 @@ async function resolveEventImages(supa, images) {
 
   const resolved = [];
   for (const image of list) {
+    const type = resolveAttachmentType(image.name || image.path, image.type);
+
     if (image.path) {
       const buckets = [
         ...new Set([image.bucket, ...EVENT_IMAGE_BUCKET_CANDIDATES].filter(Boolean)),
@@ -51,7 +60,8 @@ async function resolveEventImages(supa, images) {
       if (!url) continue;
       resolved.push({
         path: image.path,
-        name: image.name || "image",
+        name: image.name || "file",
+        type,
         url,
       });
       continue;
@@ -60,7 +70,8 @@ async function resolveEventImages(supa, images) {
     if (image.url) {
       resolved.push({
         path: image.path || undefined,
-        name: image.name || "image",
+        name: image.name || "file",
+        type,
         url: image.url,
       });
     }
@@ -94,7 +105,8 @@ async function mapEventRow(row, { resolveImages = false, supa = null } = {}) {
       .filter((item) => item?.url)
       .map((item) => ({
         path: item.path || undefined,
-        name: item.name || "image",
+        name: item.name || "file",
+        type: resolveAttachmentType(item.name || item.path, item.type),
         url: item.url,
       }));
   }
