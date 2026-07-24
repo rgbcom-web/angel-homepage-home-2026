@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, MapPin, Lock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { PortalContentFrame } from "../portal-ui";
 import {
   formatEventDateRange,
   formatCategory,
@@ -12,21 +13,21 @@ import {
 export function EventDetailPage({ event }) {
   if (!event) {
     return (
-      <div className={cn("mx-auto max-w-[900px] px-8 py-16 text-center")}>
+      <PortalContentFrame className="py-16 text-center">
         <p className={cn("text-[#64748B]")}>행사를 찾을 수 없습니다.</p>
         <Link
           href="/pediatric/events"
           className={cn("mt-4 inline-block text-sm font-semibold text-[#2563EB] hover:underline")}>
           행사 목록으로
         </Link>
-      </div>
+      </PortalContentFrame>
     );
   }
 
   const upcoming = isUpcomingEvent(event);
 
   return (
-    <div className={cn("mx-auto max-w-[900px] px-8 py-8", "tablet:px-6", "mobile:px-4")}>
+    <PortalContentFrame>
       <Link
         href="/pediatric/events"
         className={cn(
@@ -76,6 +77,6 @@ export function EventDetailPage({ event }) {
         <Lock className={cn("h-4 w-4")} />
         보안 정책에 따라 자료의 다운로드, 복사, 화면 캡처가 제한되어 있습니다.
       </p>
-    </div>
+    </PortalContentFrame>
   );
 }

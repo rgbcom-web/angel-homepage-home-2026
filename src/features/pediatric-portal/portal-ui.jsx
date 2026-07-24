@@ -3,16 +3,46 @@
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
+/** 피그마 main-content: 왼쪽 여백 고정, 콘텐츠 폭 고정, 오른쪽만 가변 */
+export const PORTAL_PAD_LEFT = "pl-[120px]";
+export const PORTAL_CONTENT_MAX = "max-w-[1500px]";
+
 export function PortalPage({ children, className }) {
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-[1340px] flex-col gap-8 px-10 pb-10 pt-[60px]",
-        "tablet:gap-6 tablet:px-6 tablet:pt-10",
+        "w-full pb-10 pt-[60px]",
+        PORTAL_PAD_LEFT,
+        "pr-10",
+        "tablet:px-6 tablet:pt-10",
         "mobile:px-4 mobile:pt-8",
+      )}>
+      <div
+        className={cn(
+          "flex w-full min-w-0 flex-col gap-8",
+          PORTAL_CONTENT_MAX,
+          "tablet:gap-6",
+          className,
+        )}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/** 상세/보조 페이지용 — 동일 왼쪽 고정 여백 */
+export function PortalContentFrame({ children, className, maxWidthClass = PORTAL_CONTENT_MAX }) {
+  return (
+    <div
+      className={cn(
+        "w-full py-8",
+        PORTAL_PAD_LEFT,
+        "pr-10",
+        "tablet:px-6",
+        "mobile:px-4",
         className,
       )}>
-      {children}
+      <div className={cn("w-full min-w-0", maxWidthClass)}>{children}</div>
     </div>
   );
 }

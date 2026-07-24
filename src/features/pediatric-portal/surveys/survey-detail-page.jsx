@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { PortalContentFrame } from "../portal-ui";
 import {
   formatSurveyPeriod,
   getSurveyStatus,
@@ -12,14 +13,14 @@ import {
 export function SurveyDetailPage({ survey }) {
   if (!survey) {
     return (
-      <div className={cn("mx-auto max-w-[900px] px-8 py-16 text-center")}>
+      <PortalContentFrame className="py-16 text-center">
         <p className={cn("text-[#64748B]")}>설문을 찾을 수 없습니다.</p>
         <Link
           href="/pediatric/surveys"
           className={cn("mt-4 inline-block text-sm font-semibold text-[#2563EB] hover:underline")}>
           설문 목록으로
         </Link>
-      </div>
+      </PortalContentFrame>
     );
   }
 
@@ -28,7 +29,7 @@ export function SurveyDetailPage({ survey }) {
   const formUrl = String(survey.googleFormUrl || "").trim();
 
   return (
-    <div className={cn("mx-auto max-w-[900px] px-8 py-8", "tablet:px-6", "mobile:px-4")}>
+    <PortalContentFrame>
       <Link
         href="/pediatric/surveys"
         className={cn(
@@ -98,6 +99,6 @@ export function SurveyDetailPage({ survey }) {
           )}
         </div>
       </article>
-    </div>
+    </PortalContentFrame>
   );
 }

@@ -5,6 +5,7 @@ import { ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { usePediatricPortal } from "./portal-context";
 import { POST_TYPE_PATH } from "./menu";
+import { PortalContentFrame } from "./portal-ui";
 
 const TYPE_LABEL = {
   resources: "자료실",
@@ -18,7 +19,7 @@ export function BoardListPage({ type, title, description }) {
   const base = POST_TYPE_PATH[type];
 
   return (
-    <div className={cn("mx-auto max-w-[900px] px-8 py-8", "tablet:px-6", "mobile:px-4")}>
+    <PortalContentFrame>
       <h1 className={cn("text-2xl font-bold text-[#0F172A]", "mobile:text-xl")}>{title}</h1>
       {description && <p className={cn("mt-2 text-sm text-[#64748B]")}>{description}</p>}
 
@@ -60,6 +61,6 @@ export function BoardListPage({ type, title, description }) {
           ))
         )}
       </ul>
-    </div>
+    </PortalContentFrame>
   );
 }

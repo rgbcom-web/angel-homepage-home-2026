@@ -65,7 +65,9 @@ export function PediatricPortalShell({ member, notices = [], notifications = [],
             </div>
           )}
 
-          <div className={cn("min-w-0 flex-1 overflow-y-auto")}>{children}</div>
+          <div data-portal-main className={cn("min-w-0 flex-1 overflow-y-auto overflow-x-hidden")}>
+            {children}
+          </div>
         </div>
       </div>
     </PediatricPortalProvider>

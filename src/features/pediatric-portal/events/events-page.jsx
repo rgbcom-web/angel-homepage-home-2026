@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import {
   PortalPage,
@@ -41,12 +42,6 @@ function IconImg({ src, size = 16, className }) {
       className={cn("shrink-0", className)}
     />
   );
-}
-
-function getCarouselStep(scroller) {
-  const firstCard = scroller?.querySelector("[data-event-card]");
-  if (!firstCard) return 0;
-  return firstCard.getBoundingClientRect().width + CARD_GAP;
 }
 
 export function EventsPage({ events = [], source = "mock", fetchError = null }) {
@@ -114,21 +109,15 @@ export function EventsPage({ events = [], source = "mock", fetchError = null }) 
             : "검색 결과가 없습니다."}
         </div>
       ) : (
-        <div className="flex flex-col gap-10">
+        <div className="flex min-w-0 flex-col gap-10">
           {upcoming.length > 0 && (
-            <section className="flex flex-col gap-6">
-              <h2 className="flex items-end gap-1 text-[22px] leading-none">
-                <span className="font-semibold text-[#0F172A]">예정된 행사</span>
-                <span className="font-medium text-[#0066FF]">({upcoming.length})</span>
-              </h2>
-              <UpcomingCarousel events={upcoming} />
-            </section>
+            <UpcomingCarousel events={upcoming} />
           )}
 
           {past.length > 0 && (
-            <section className="flex flex-col gap-6">
-              <h2 className="flex items-end gap-1 text-[22px] leading-none">
-                <span className="font-bold text-[#64748B]">지난 행사</span>
+            <section className="flex min-w-0 flex-col gap-6">
+              <h2 className="flex items-end gap-1 text-[20px] leading-normal">
+                <span className="font-semibold text-[#64748B]">지난 행사</span>
                 <span className="font-medium text-[#94A3B8]">({past.length})</span>
               </h2>
               <div className={cn("grid grid-cols-2 gap-6", "tablet:grid-cols-1")}>
@@ -144,90 +133,286 @@ export function EventsPage({ events = [], source = "mock", fetchError = null }) 
   );
 }
 
-function UpcomingCarousel({ events }) {
-  const scrollerRef = useRef(null);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const isCarousel = events.length > 1;
-
-  useEffect(() => {
-    setActiveIndex(0);
-    scrollerRef.current?.scrollTo({ left: 0 });
-  }, [events]);
-
-  const updateActiveIndex = () => {
-    const el = scrollerRef.current;
-    const step = getCarouselStep(el);
-    if (!el || step <= 0) return;
-    const next = Math.round(el.scrollLeft / step);
-    setActiveIndex(Math.max(0, Math.min(events.length - 1, next)));
-  };
-
-  const scrollToIndex = (index) => {
-    const el = scrollerRef.current;
-    const step = getCarouselStep(el);
-    if (!el || step <= 0) return;
-    el.scrollTo({ left: step * index, behavior: "smooth" });
-    setActiveIndex(index);
-  };
-
-  if (!isCarousel) {
-    return (
-      <div className="w-full max-w-[620px]">
-        <EventCard event={events[0]} variant="upcoming" />
-      </div>
-    );
-  }
+function CarouselNavButton({ direction, disabled, onClick }) {
+  const Icon = direction === "prev" ? ChevronLeft : ChevronRight;
 
   return (
-    <div className="flex flex-col items-center gap-6">
-      <div
-        ref={scrollerRef}
-        onScroll={updateActiveIndex}
-        className={cn(
-          "w-full cursor-grab overflow-x-auto active:cursor-grabbing",
-          "-mx-10 px-10",
-          "tablet:-mx-6 tablet:px-6",
-          "mobile:-mx-4 mobile:px-4",
-          "snap-x snap-mandatory scroll-smooth",
-          "[scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
-        )}
-        style={{ WebkitOverflowScrolling: "touch" }}>
-        <div className={cn("flex w-max gap-6 pr-10", "tablet:pr-6", "mobile:pr-4")}>
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} variant="upcoming" />
-          ))}
-        </div>
-      </div>
-
-      <div
-        role="tablist"
-        aria-label="예정된 행사 페이지"
-        className="flex h-9 items-center gap-1.5 rounded-full bg-white px-3.5 shadow-[0px_2px_8px_rgba(15,23,42,0.06)]">
-        {events.map((event, index) => {
-          const isActive = index === activeIndex;
-          return (
-            <button
-              key={event.id}
-              type="button"
-              role="tab"
-              aria-selected={isActive}
-              aria-label={`${index + 1}번째 행사`}
-              onClick={() => scrollToIndex(index)}
-              className={cn(
-                "rounded-full transition-all",
-                isActive
-                  ? "h-2 w-6 bg-[#427DFF]"
-                  : "size-2 bg-[#CBD5E1] hover:bg-[#94A3B8]",
-              )}
-            />
-          );
-        })}
-      </div>
-    </div>
+    <button
+      type="button"
+      aria-label={direction === "prev" ? "이전 행사" : "다음 행사"}
+      disabled={disabled}
+      onClick={onClick}
+      className={cn(
+        "flex size-10 items-center justify-center rounded-full border-2 border-[#427DFF] bg-transparent text-[#427DFF] transition-opacity",
+        "hover:bg-[#427DFF]/10",
+        "disabled:cursor-default disabled:border-[#CBD5E1] disabled:text-[#CBD5E1] disabled:hover:bg-transparent",
+      )}>
+      <Icon className="size-5" strokeWidth={2} />
+    </button>
   );
 }
 
-function EventCard({ event, variant = "upcoming" }) {
+function UpcomingCarousel({ events }) {
+  const wrapRef = useRef(null);
+  const trackRef = useRef(null);
+  const dragRef = useRef({
+    pointerId: null,
+    startX: 0,
+    startY: 0,
+    delta: 0,
+    dragging: false,
+    moved: false,
+  });
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [layout, setLayout] = useState({ cardWidth: 0, viewportWidth: 0 });
+  const [dragDelta, setDragDelta] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const isCarousel = events.length > 1;
+  const step = layout.cardWidth > 0 ? layout.cardWidth + CARD_GAP : 0;
+  const canPrev = activeIndex > 0;
+  const canNext = activeIndex < events.length - 1;
+  const maxIndex = Math.max(0, events.length - 1);
+
+  useEffect(() => {
+    setActiveIndex(0);
+    setDragDelta(0);
+    setIsDragging(false);
+  }, [events]);
+
+  useEffect(() => {
+    const wrap = wrapRef.current;
+    if (!wrap) return undefined;
+
+    const update = () => {
+      const contentWidth = wrap.getBoundingClientRect().width;
+      if (contentWidth <= 0) return;
+
+      const isNarrow = window.matchMedia("(max-width: 1399px)").matches;
+      const cardWidth = isNarrow
+        ? contentWidth
+        : Math.max(0, (contentWidth - CARD_GAP) / 2);
+
+      const main = wrap.closest("[data-portal-main]");
+      const mainRight = main
+        ? main.getBoundingClientRect().right
+        : window.innerWidth;
+      const wrapLeft = wrap.getBoundingClientRect().left;
+      const viewportWidth = isNarrow
+        ? contentWidth
+        : Math.max(contentWidth, mainRight - wrapLeft);
+
+      setLayout({ cardWidth, viewportWidth });
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(wrap);
+    window.addEventListener("resize", update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", update);
+    };
+  }, []);
+
+  const goTo = (index) => {
+    setActiveIndex(Math.max(0, Math.min(maxIndex, index)));
+    setDragDelta(0);
+    setIsDragging(false);
+  };
+
+  const endDrag = (delta) => {
+    const threshold = Math.max(40, step * 0.18);
+    if (delta <= -threshold && activeIndex < maxIndex) {
+      goTo(activeIndex + 1);
+    } else if (delta >= threshold && activeIndex > 0) {
+      goTo(activeIndex - 1);
+    } else {
+      setDragDelta(0);
+      setIsDragging(false);
+    }
+  };
+
+  const onPointerDown = (e) => {
+    if (!isCarousel || step <= 0 || e.button !== 0) return;
+    dragRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      delta: 0,
+      dragging: false,
+      moved: false,
+    };
+  };
+
+  const onPointerMove = (e) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+
+    const dx = e.clientX - drag.startX;
+    const dy = e.clientY - drag.startY;
+
+    if (!drag.dragging) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      // 세로 스크롤이면 드래그 포기
+      if (Math.abs(dy) > Math.abs(dx)) {
+        drag.pointerId = null;
+        return;
+      }
+      drag.dragging = true;
+      drag.moved = true;
+      setIsDragging(true);
+      trackRef.current?.setPointerCapture?.(e.pointerId);
+    }
+
+    let nextDelta = dx;
+    if (activeIndex === 0 && nextDelta > 0) nextDelta *= 0.35;
+    if (activeIndex === maxIndex && nextDelta < 0) nextDelta *= 0.35;
+
+    drag.delta = nextDelta;
+    setDragDelta(nextDelta);
+  };
+
+  const onPointerUp = (e) => {
+    const drag = dragRef.current;
+    if (!drag || drag.pointerId !== e.pointerId) return;
+
+    if (drag.dragging) {
+      endDrag(drag.delta);
+      try {
+        trackRef.current?.releasePointerCapture?.(e.pointerId);
+      } catch {
+        /* already released */
+      }
+    }
+
+    // 짧은 탭은 Link 클릭 유지, 드래그면 클릭 차단
+    const shouldBlockClick = drag.moved;
+    dragRef.current = {
+      pointerId: null,
+      startX: 0,
+      startY: 0,
+      delta: 0,
+      dragging: false,
+      moved: shouldBlockClick,
+    };
+  };
+
+  const onClickCapture = (e) => {
+    if (!dragRef.current.moved) return;
+    e.preventDefault();
+    e.stopPropagation();
+    dragRef.current.moved = false;
+  };
+
+  const cardStyle =
+    layout.cardWidth > 0
+      ? { width: layout.cardWidth, flex: "0 0 auto" }
+      : undefined;
+
+  const translateX =
+    step > 0 ? -(activeIndex * step) + dragDelta : dragDelta;
+
+  return (
+    <section className="flex min-w-0 flex-col gap-6">
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="flex items-end gap-1 text-[20px] leading-normal">
+          <span className="font-semibold text-[#0F172A]">예정된 행사</span>
+          <span className="font-medium text-[#0066FF]">({events.length})</span>
+        </h2>
+
+        {isCarousel && (
+          <div className="flex shrink-0 items-center gap-2">
+            <CarouselNavButton
+              direction="prev"
+              disabled={!canPrev}
+              onClick={() => goTo(activeIndex - 1)}
+            />
+            <CarouselNavButton
+              direction="next"
+              disabled={!canNext}
+              onClick={() => goTo(activeIndex + 1)}
+            />
+          </div>
+        )}
+      </div>
+
+      <div ref={wrapRef} className="w-full min-w-0">
+        {!isCarousel ? (
+          <EventCard
+            event={events[0]}
+            variant="upcoming"
+            style={cardStyle}
+            className={layout.cardWidth <= 0 ? "w-[calc(50%-12px)] tablet:w-full" : undefined}
+          />
+        ) : (
+          <div className="flex min-w-0 flex-col gap-6">
+            <div
+              ref={trackRef}
+              className={cn(
+                "overflow-hidden touch-pan-y select-none",
+                isDragging ? "cursor-grabbing" : "cursor-grab",
+              )}
+              style={{
+                width: layout.viewportWidth > 0 ? layout.viewportWidth : "100%",
+              }}
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              onClickCapture={onClickCapture}>
+              <div
+                className={cn(
+                  "flex gap-6 will-change-transform",
+                  !isDragging && "transition-transform duration-300 ease-out",
+                )}
+                style={{
+                  transform: `translate3d(${translateX}px, 0, 0)`,
+                }}>
+                {events.map((event) => (
+                  <EventCard
+                    key={event.id}
+                    event={event}
+                    variant="upcoming"
+                    style={cardStyle}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div className="flex w-full justify-center">
+              <div
+                role="tablist"
+                aria-label="예정된 행사 페이지"
+                className="flex h-8 items-center gap-1.5 rounded-full bg-white px-5 shadow-[0px_2px_8px_rgba(15,23,42,0.06)]">
+                {events.map((event, index) => {
+                  const isActive = index === activeIndex;
+                  return (
+                    <button
+                      key={event.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      aria-label={`${index + 1}번째 행사`}
+                      onClick={() => goTo(index)}
+                      className={cn(
+                        "rounded-full transition-all",
+                        isActive
+                          ? "h-2 w-6 bg-[#427DFF]"
+                          : "size-2 bg-[#D3DCE9] hover:bg-[#94A3B8]",
+                      )}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function EventCard({ event, variant = "upcoming", style, className }) {
   const isPast = variant === "past";
   const muted = isPast ? "text-[#94A3B8]" : "text-[#475569]";
   const titleColor = isPast ? "text-[#64748B]" : "text-[#0F172A]";
@@ -236,11 +421,13 @@ function EventCard({ event, variant = "upcoming" }) {
     <Link
       href={`/pediatric/events/${event.id}`}
       data-event-card={!isPast || undefined}
+      style={isPast ? undefined : style}
       className={cn(
         "flex overflow-hidden rounded-2xl border border-[#E2E8F0] shadow-[0px_4px_12px_rgba(15,23,42,0.02)] transition-shadow hover:shadow-md",
         isPast
           ? "w-full min-w-0 bg-[#F8FAFC]"
-          : "w-[620px] shrink-0 snap-start bg-white tablet:w-[min(620px,calc(100vw-3rem))] mobile:max-w-none mobile:w-[min(620px,calc(100vw-2rem))]",
+          : "shrink-0 bg-white",
+        className,
       )}>
       <span
         aria-hidden
@@ -304,11 +491,14 @@ function EventCard({ event, variant = "upcoming" }) {
             )}>
             자세히보기
           </span>
-          <IconImg
-            src={isPast ? ICON.arrowMuted : ICON.arrow}
-            size={10}
-            className="size-4"
-          />
+          {/* 피그마: 16px 프레임 안 9.6px 화살표 (inset 20%) */}
+          <span className="relative inline-flex size-4 shrink-0 items-center justify-center">
+            <IconImg
+              src={isPast ? ICON.arrowMuted : ICON.arrow}
+              size={10}
+              className="size-[9.6px]"
+            />
+          </span>
         </div>
       </div>
     </Link>

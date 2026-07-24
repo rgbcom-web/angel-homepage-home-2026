@@ -17,6 +17,7 @@ import { usePediatricPortal } from "./portal-context";
 import { formatMemberDisplayName } from "./mock-data";
 import { POST_TYPE_PATH } from "./menu";
 import { isUpcomingEvent } from "./events/events-data";
+import { PORTAL_CONTENT_MAX, PORTAL_PAD_LEFT } from "./portal-ui";
 
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
@@ -48,10 +49,18 @@ export function PortalHomeDashboard({ events = [] }) {
   return (
     <div
       className={cn(
-        "mx-auto flex w-full max-w-[1340px] flex-col gap-8 px-10 pb-10 pt-10",
-        "tablet:gap-6 tablet:px-6 tablet:pt-8",
+        "w-full pb-10 pt-10",
+        PORTAL_PAD_LEFT,
+        "pr-10",
+        "tablet:px-6 tablet:pt-8",
         "mobile:px-4 mobile:pt-6",
       )}>
+      <div
+        className={cn(
+          "flex w-full min-w-0 flex-col gap-8",
+          PORTAL_CONTENT_MAX,
+          "tablet:gap-6",
+        )}>
       <GreetingBanner dateLabel={greetingDate} displayName={displayName} />
 
       <div
@@ -69,6 +78,7 @@ export function PortalHomeDashboard({ events = [] }) {
           categoryFilter={categoryFilter}
           onCategoryChange={setCategoryFilter}
         />
+      </div>
       </div>
     </div>
   );

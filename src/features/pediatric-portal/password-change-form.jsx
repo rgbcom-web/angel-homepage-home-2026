@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Lock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { changePasswordAction } from "@/features/pediatric-auth/actions";
+import { PortalContentFrame } from "./portal-ui";
 
 const initialState = { success: false, message: "" };
 
@@ -24,7 +25,7 @@ export function PasswordChangeForm() {
   }, initialState);
 
   return (
-    <div className={cn("mx-auto max-w-[560px] px-8 py-8", "tablet:px-6", "mobile:px-4")}>
+    <PortalContentFrame maxWidthClass="max-w-[640px]">
       <header className={cn("mb-6")}>
         <h1 className={cn("text-2xl font-bold text-[#0F172A]", "mobile:text-xl")}>비밀번호 변경</h1>
         <p className={cn("mt-1 text-sm text-[#64748B]")}>
@@ -95,7 +96,7 @@ export function PasswordChangeForm() {
         <Lock className={cn("h-4 w-4")} />
         보안 정책에 따라 자료의 다운로드, 복사, 화면 캡쳐가 제한되어 있습니다.
       </p>
-    </div>
+    </PortalContentFrame>
   );
 }
 

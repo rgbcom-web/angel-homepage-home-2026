@@ -4,12 +4,13 @@ import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
 import { usePediatricPortal } from "./portal-context";
 import { formatRelativeTime } from "./mock-data";
+import { PortalContentFrame } from "./portal-ui";
 
 export function NotificationsPage() {
   const { notifications, markAllRead, markAsRead, unreadCount } = usePediatricPortal();
 
   return (
-    <div className={cn("mx-auto max-w-[800px] px-8 py-8", "tablet:px-6", "mobile:px-4")}>
+    <PortalContentFrame>
       <div className={cn("mb-6 flex items-center justify-between")}>
         <h1 className={cn("text-2xl font-bold text-[#0F172A]", "mobile:text-xl")}>알림</h1>
         {unreadCount > 0 && (
@@ -46,6 +47,6 @@ export function NotificationsPage() {
           ))
         )}
       </ul>
-    </div>
+    </PortalContentFrame>
   );
 }

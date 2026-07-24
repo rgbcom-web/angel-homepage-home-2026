@@ -2,13 +2,10 @@ import Link from "next/link";
 import { cn } from "@/shared/lib/utils";
 import { SVG_Logo } from "@/shared/svgs";
 import { PEDIATRIC_SITE_NAME } from "@/features/pediatric-portal/site";
-import { AuthGlow } from "@/features/pediatric-auth/auth-glow";
 
 export default function AuthLayout({ children }) {
   return (
     <div className={cn("relative min-h-screen overflow-hidden bg-[#F4F7FC] font-primary")}>
-      <AuthGlow />
-
       <header
         className={cn(
           "relative z-10 flex h-[114px] items-center border-b border-[#E2E8F0] bg-white px-10",
