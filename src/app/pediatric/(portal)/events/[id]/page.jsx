@@ -11,6 +11,6 @@ export async function generateMetadata({ params }) {
 
 export default async function PediatricEventDetailRoute({ params }) {
   const { id } = await params;
-  const { event } = await fetchEventById(id);
+  const { event } = await fetchEventById(id, { recordView: true });
   return <EventDetailPage event={event} />;
 }

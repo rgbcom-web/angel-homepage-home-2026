@@ -3,11 +3,73 @@
 import { createAdminClient } from "@/service/db/supabase/server";
 import { MOCK_EVENTS } from "./events-data";
 
-function mapEventRow(row) {
-  const images = Array.isArray(row.images)
-    ? row.images.filter((item) => item?.url)
-    : [];
+const EVENT_IMAGE_BUCKET_CANDIDATES = [
+  ...new Set(
+    [
+      process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET,
+      process.env.PEDIATRIC_SUPABASE_STORAGE_BUCKET,
+    ].filter(Boolean),
+  ),
+];
+const EVENT_IMAGE_SIGNED_TTL = 60 * 60; // 1h
 
+function normalizeEventImages(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.filter((item) => item?.url || item?.path);
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed.filter((item) => item?.url || item?.path) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
+async function resolveEventImages(supa, images) {
+  const list = normalizeEventImages(images);
+  if (!list.length) return [];
+
+  const resolved = [];
+  for (const image of list) {
+    if (image.path) {
+      const buckets = [
+        ...new Set([image.bucket, ...EVENT_IMAGE_BUCKET_CANDIDATES].filter(Boolean)),
+      ];
+      let url = "";
+      for (const bucket of buckets) {
+        const { data, error } = await supa.storage
+          .from(bucket)
+          .createSignedUrl(image.path, EVENT_IMAGE_SIGNED_TTL);
+        if (!error && data?.signedUrl) {
+          url = data.signedUrl;
+          break;
+        }
+      }
+      if (!url && image.url) url = image.url;
+      if (!url) continue;
+      resolved.push({
+        path: image.path,
+        name: image.name || "image",
+        url,
+      });
+      continue;
+    }
+
+    if (image.url) {
+      resolved.push({
+        path: image.path || undefined,
+        name: image.name || "image",
+        url: image.url,
+      });
+    }
+  }
+
+  return resolved;
+}
+
+function mapEventRowBase(row, images = []) {
   return {
     id: row.id,
     year: row.year || Number(String(row.start_date || "").slice(0, 4)),
@@ -21,6 +83,22 @@ function mapEventRow(row) {
     images,
     showInNotice: Boolean(row.show_in_notice),
   };
+}
+
+async function mapEventRow(row, { resolveImages = false, supa = null } = {}) {
+  let images = normalizeEventImages(row.images);
+  if (resolveImages && supa) {
+    images = await resolveEventImages(supa, images);
+  } else {
+    images = images
+      .filter((item) => item?.url)
+      .map((item) => ({
+        path: item.path || undefined,
+        name: item.name || "image",
+        url: item.url,
+      }));
+  }
+  return mapEventRowBase(row, images);
 }
 
 export async function fetchEvents({ query = "" } = {}) {
@@ -37,8 +115,12 @@ export async function fetchEvents({ query = "" } = {}) {
     const { data, error } = await dbQuery;
     if (error) throw error;
 
+    const events = await Promise.all(
+      (data || []).map((row) => mapEventRow(row, { resolveImages: false, supa })),
+    );
+
     return {
-      events: (data || []).map(mapEventRow),
+      events,
       source: "supabase",
       error: null,
     };
@@ -64,16 +146,19 @@ export async function fetchEvents({ query = "" } = {}) {
   }
 }
 
-export async function fetchEventById(id) {
+export async function fetchEventById(id, { recordView = false } = {}) {
   try {
     const supa = await createAdminClient();
     const { data, error } = await supa.from("advisory_events").select("*").eq("id", id).single();
     if (error) throw error;
 
-    const { recordAdvisoryMemberView } = await import("../member-view-log");
-    await recordAdvisoryMemberView("event", id);
+    if (recordView) {
+      const { recordAdvisoryMemberView } = await import("../member-view-log");
+      await recordAdvisoryMemberView("event", id);
+    }
 
-    return { event: mapEventRow(data), source: "supabase", error: null };
+    const event = await mapEventRow(data, { resolveImages: true, supa });
+    return { event, source: "supabase", error: null };
   } catch (error) {
     const fallback = MOCK_EVENTS.find((item) => item.id === id) || null;
     return {
