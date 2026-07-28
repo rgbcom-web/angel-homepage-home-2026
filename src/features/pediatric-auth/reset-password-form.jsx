@@ -54,7 +54,7 @@ export function ResetPasswordForm({ token, tokenValid }) {
         <p className={cn("text-sm font-semibold text-[#2563EB]")}>{PEDIATRIC_SITE_NAME}</p>
         <h1 className={cn("mt-2 text-2xl font-bold text-[#0F172A]")}>새 비밀번호 설정</h1>
         <p className={cn("mt-2 text-sm text-[#64748B]")}>
-          영문, 숫자, 특수문자 조합 8~20자로 입력해 주세요.
+          새 비밀번호를 입력해 주세요.
         </p>
       </div>
 

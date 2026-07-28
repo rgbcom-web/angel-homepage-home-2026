@@ -173,7 +173,7 @@ function SignupFormFields() {
             name="password"
             show={showPassword}
             onToggle={() => setShowPassword((v) => !v)}
-            placeholder="영문, 숫자, 특수문자 조합 8~16자"
+            placeholder="비밀번호를 입력해주세요"
           />
         </Field>
 

@@ -13,6 +13,7 @@ function formatNoticeDate(value) {
 
 /**
  * 홈 공지: 자료실/행사/설문 중 show_in_notice=true 항목만 집계
+ * 노출 순서는 게시일(created_at) 최신순
  */
 export async function fetchPortalNotices() {
   try {
@@ -25,11 +26,11 @@ export async function fetchPortalNotices() {
         .eq("show_in_notice", true),
       supa
         .from("advisory_events")
-        .select("id,title,start_date,show_in_notice")
+        .select("id,title,created_at,show_in_notice")
         .eq("show_in_notice", true),
       supa
         .from("advisory_surveys")
-        .select("id,title,start_date,show_in_notice")
+        .select("id,title,created_at,show_in_notice")
         .eq("show_in_notice", true),
     ]);
 
@@ -50,9 +51,9 @@ export async function fetchPortalNotices() {
         id: row.id,
         type: "events",
         title: row.title,
-        date: formatNoticeDate(row.start_date),
+        date: formatNoticeDate(row.created_at),
         showInNotice: true,
-        sortAt: row.start_date,
+        sortAt: row.created_at,
       });
     }
     for (const row of surveys.data || []) {
@@ -60,9 +61,9 @@ export async function fetchPortalNotices() {
         id: row.id,
         type: "surveys",
         title: row.title,
-        date: formatNoticeDate(row.start_date),
+        date: formatNoticeDate(row.created_at),
         showInNotice: true,
-        sortAt: row.start_date,
+        sortAt: row.created_at,
       });
     }
 

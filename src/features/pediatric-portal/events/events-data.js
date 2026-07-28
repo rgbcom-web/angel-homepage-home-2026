@@ -143,9 +143,21 @@ export function splitEventsBySchedule(events = []) {
     if (isUpcomingEvent(event)) upcoming.push(event);
     else past.push(event);
   }
+  // 진행중/예정: 가장 가까운 행사부터 (시작일 오름차순)
   upcoming.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
-  past.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+  // 종료: 최근 종료된 행사부터 (종료일 내림차순)
+  past.sort(
+    (a, b) =>
+      new Date(b.endDate || b.startDate) - new Date(a.endDate || a.startDate),
+  );
   return { upcoming, past };
+}
+
+/** 진행중 행사 → 종료된 행사 순으로 합친 목록 */
+export function getOrderedEventList(events = [], filters = {}) {
+  const filtered = getEventList(events, filters);
+  const { upcoming, past } = splitEventsBySchedule(filtered);
+  return [...upcoming, ...past];
 }
 
 export function getEventCategories(events = MOCK_EVENTS) {

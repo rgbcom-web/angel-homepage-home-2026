@@ -26,7 +26,7 @@ const GREETING_BANNER_SRC = "/images/pediatric/home/greeting-banner.jpg";
 export function PortalHomeDashboard({ events = [] }) {
   const { member, notices } = usePediatricPortal();
   const displayName = formatMemberDisplayName(member);
-  const [categoryFilter, setCategoryFilter] = useState("학회");
+  const [categoryFilter, setCategoryFilter] = useState("전체");
 
   const greetingDate = useMemo(() => formatKoreanDate(new Date()), []);
 
@@ -38,7 +38,7 @@ export function PortalHomeDashboard({ events = [] }) {
         : list.filter((event) => event.category === categoryFilter);
     return filtered
       .sort((a, b) => String(a.startDate).localeCompare(String(b.startDate)))
-      .slice(0, 4);
+      .slice(0, 5);
   }, [events, categoryFilter]);
 
   const categories = useMemo(() => {
@@ -319,8 +319,8 @@ function EventsSection({ events, categories, categoryFilter, onCategoryChange })
         </p>
       ) : (
         <div className={cn("space-y-5")}>
-          {events.map((event, index) => (
-            <EventCard key={event.id} event={event} featured={index === 0} />
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
           ))}
         </div>
       )}
@@ -337,21 +337,17 @@ function EventsSection({ events, categories, categoryFilter, onCategoryChange })
   );
 }
 
-function EventCard({ event, featured }) {
+function EventCard({ event }) {
   return (
     <Link
       href={`/pediatric/events/${event.id}`}
       className={cn(
-        "block overflow-hidden rounded-xl border transition-shadow hover:shadow-md",
-        featured
-          ? "border-[#FF9A17] bg-white"
-          : "border-[#E2E8F0] bg-[#F8FAFC]",
+        "block overflow-hidden rounded-xl border border-[#FF9A17] bg-white transition-shadow hover:shadow-md",
       )}>
       <div
         className={cn(
-          "flex items-center justify-between px-[30px] py-[13px] text-base font-bold",
+          "flex items-center justify-between bg-[#FF9A17] px-[30px] py-[13px] text-base font-bold text-white",
           "mobile:px-4 mobile:text-sm",
-          featured ? "bg-[#FF9A17] text-white" : "bg-[#E2E8F0] text-[#64748B]",
         )}>
         <span className={cn("min-w-0 truncate")}>{formatEventHeaderDate(event)}</span>
         <ChevronRight className={cn("h-5 w-5 shrink-0 opacity-80")} />
@@ -359,33 +355,18 @@ function EventCard({ event, featured }) {
       <div className={cn("space-y-5 px-[30px] pb-5 pt-5", "mobile:space-y-4 mobile:px-4")}>
         <div className={cn("space-y-3")}>
           <div className={cn("flex flex-wrap items-center gap-2.5")}>
-            <h3
-              className={cn(
-                "text-lg font-medium",
-                featured ? "text-[#1E293B]" : "text-[#64748B]",
-              )}>
-              {event.title}
-            </h3>
+            <h3 className={cn("text-lg font-medium text-[#1E293B]")}>{event.title}</h3>
             {event.category && (
               <span
                 className={cn(
-                  "rounded-[5px] px-2.5 py-1 text-sm font-semibold",
-                  featured
-                    ? "bg-[rgba(255,154,23,0.12)] text-[#FF9A17]"
-                    : "bg-[#F1F5F9] text-[#64748B]",
+                  "rounded-[5px] bg-[rgba(255,154,23,0.12)] px-2.5 py-1 text-sm font-semibold text-[#FF9A17]",
                 )}>
                 {event.category}
               </span>
             )}
           </div>
           {event.subtitle && (
-            <p
-              className={cn(
-                "truncate text-[15px]",
-                featured ? "text-[#475569]" : "text-[#64748B]",
-              )}>
-              {event.subtitle}
-            </p>
+            <p className={cn("truncate text-[15px] text-[#475569]")}>{event.subtitle}</p>
           )}
         </div>
         {event.location && (

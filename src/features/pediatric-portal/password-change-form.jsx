@@ -49,7 +49,7 @@ export function PasswordChangeForm() {
             name="newPassword"
             show={showNew}
             onToggle={() => setShowNew((v) => !v)}
-            placeholder="영문, 숫자, 특수문자 조합 8~20자"
+            placeholder="새 비밀번호를 입력해주세요"
           />
         </Field>
         <Field label="새 비밀번호 확인" required>

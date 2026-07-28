@@ -1,5 +1,5 @@
 export const LOGIN_ID_REGEX = /^[a-z0-9]{6,20}$/;
-export const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,20}$/;
+export const PASSWORD_REGEX = /.*/; // 비밀번호 복잡도 규칙 없음 (입력만 있으면 허용)
 export const BIRTH_YEAR_REGEX = /^(19|20)\d{2}$/;
 export const PHONE_REGEX = /^\d{9,11}$/;
 export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -14,9 +14,6 @@ export function validateLoginId(loginId) {
 
 export function validatePassword(password) {
   if (!password) return "비밀번호를 입력해 주세요.";
-  if (!PASSWORD_REGEX.test(password)) {
-    return "비밀번호는 영문, 숫자, 특수문자 조합 8~20자여야 합니다.";
-  }
   return null;
 }
 
