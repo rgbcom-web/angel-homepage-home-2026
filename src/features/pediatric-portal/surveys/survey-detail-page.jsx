@@ -40,10 +40,7 @@ export function SurveyDetailPage({ survey }) {
       </Link>
 
       <article
-        className={cn(
-          "rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm",
-          "mobile:p-5",
-        )}>
+        className={cn("rounded-2xl border border-[#E2E8F0] bg-white p-8 shadow-sm", "mobile:p-5")}>
         <div className={cn("flex flex-wrap items-center gap-2")}>
           <span
             className={cn(
@@ -64,7 +61,7 @@ export function SurveyDetailPage({ survey }) {
         {survey.description && (
           <p
             className={cn(
-              "mt-6 border-t border-[#F1F5F9] pt-6 text-[15px] leading-relaxed text-[#334155]",
+              "mt-6 whitespace-pre-wrap border-t border-[#F1F5F9] pt-6 text-[15px] leading-relaxed text-[#334155]",
             )}>
             {survey.description}
           </p>
@@ -79,7 +76,7 @@ export function SurveyDetailPage({ survey }) {
               className={cn(
                 "inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-[#427DFF] px-6 text-base font-semibold text-white hover:opacity-90",
               )}>
-              구글폼으로 설문 참여
+              설문 참여
               <ExternalLink className={cn("h-4 w-4")} />
             </a>
           ) : ongoing && !formUrl ? (
@@ -87,7 +84,7 @@ export function SurveyDetailPage({ survey }) {
               className={cn(
                 "rounded-xl border border-[#E2E8F0] bg-[#F8FAFC] px-5 py-6 text-center text-sm text-[#94A3B8]",
               )}>
-              구글폼 링크가 등록되지 않았습니다.
+              링크가 등록되지 않았습니다.
             </div>
           ) : (
             <div

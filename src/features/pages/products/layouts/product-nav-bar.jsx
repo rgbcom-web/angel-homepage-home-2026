@@ -69,14 +69,6 @@ const PRODUCT_NAV_BAR_ITEMS = [
       en: "GEAR",
     },
   },
-  {
-    theme: "gray",
-    href: "/products/angel-kit/brand",
-    label: {
-      ko: "KIT",
-      en: "KIT",
-    },
-  },
 ];
 
 const ProductNavBarContext = createContext();
@@ -90,7 +82,8 @@ export function ProductNavBar() {
     const parentPath = item.href.split("/brand")[0];
     return purePath.startsWith(parentPath);
   });
-  const { subItems, theme } = currentItem;
+
+  const { subItems, theme } = currentItem || {};
   const currentSubItem = subItems?.find((item) => purePath === item.href);
   const { navLinks } = currentSubItem || {};
 
@@ -110,6 +103,11 @@ export function ProductNavBar() {
       setShow(false);
     }
   });
+
+  // KIT 등 네비에서 빠진 제품 페이지는 하단 바 없이 렌더 (빌드 크래시 방지)
+  if (!currentItem) {
+    return null;
+  }
 
   return (
     <ProductNavBarContext value={{ pathname, purePath, currentItem, currentSubItem, theme }}>

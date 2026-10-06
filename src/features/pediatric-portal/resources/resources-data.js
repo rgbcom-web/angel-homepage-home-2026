@@ -30,6 +30,18 @@ export const MOCK_RESOURCES = [
     fileName: "angel-suit-h10-brochure-v2.1.pdf",
     sourceUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
     description: "엔젤슈트 H10 제품 브로슈어입니다.",
+    files: [
+      {
+        name: "angel-suit-h10-brochure-v2.1.pdf",
+        type: "pdf",
+        sourceUrl: "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf",
+      },
+      {
+        name: "h10-cover.png",
+        type: "image",
+        sourceUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1200&q=80",
+      },
+    ],
   },
   {
     id: "res-2",
@@ -94,7 +106,6 @@ export function getResourceNotices(resources = MOCK_RESOURCES) {
 export function getResourceList(resources = MOCK_RESOURCES, { query = "" } = {}) {
   const q = query.trim().toLowerCase();
   return resources
-    .filter((item) => !item.isNotice)
     .filter((item) => !q || item.title?.toLowerCase().includes(q))
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 }

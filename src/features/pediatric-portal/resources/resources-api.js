@@ -11,12 +11,58 @@ function formatDate(value) {
   return `${yyyy}-${mm}-${dd}`;
 }
 
+function resolveFileType(name = "", type = "") {
+  if (type === "image" || type === "pdf") return type;
+  const lower = String(name || "").toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(lower)) return "image";
+  return "pdf";
+}
+
 /** 클라이언트에는 공개 Storage URL을 노출하지 않고 인증 프록시 경로만 반환 */
-function resourceFileProxyUrl(id) {
-  return `/api/pediatric/resources/${id}/file`;
+function resourceFileProxyUrl(id, index = 0) {
+  const i = Number(index) || 0;
+  return `/api/pediatric/resources/${id}/file?index=${i}`;
+}
+
+function normalizeFilesFromRow(row) {
+  let files = [];
+  if (Array.isArray(row?.files) && row.files.length) {
+    files = row.files.filter((f) => f?.path || f?.sourceUrl);
+  } else if (typeof row?.files === "string") {
+    try {
+      const parsed = JSON.parse(row.files);
+      if (Array.isArray(parsed)) files = parsed.filter((f) => f?.path || f?.sourceUrl);
+    } catch {
+      files = [];
+    }
+  }
+
+  if (!files.length && (row?.file_path || row?.sourceUrl)) {
+    files = [
+      {
+        path: row.file_path || "",
+        name: row.file_name || "",
+        type: row.file_type || "pdf",
+        sourceUrl: row.sourceUrl || "",
+      },
+    ];
+  }
+
+  return files.map((file, index) => {
+    const name = file.name || file.fileName || `첨부 ${index + 1}`;
+    const type = resolveFileType(name, file.type || file.fileType);
+    return {
+      name,
+      type,
+      fileUrl: resourceFileProxyUrl(row.id, index),
+    };
+  });
 }
 
 function mapResourceRow(row) {
+  const files = normalizeFilesFromRow(row);
+  const first = files[0] || null;
+
   return {
     id: row.id,
     title: row.title || "",
@@ -25,13 +71,25 @@ function mapResourceRow(row) {
     views: row.views ?? 0,
     isNotice: Boolean(row.is_notice),
     showInNotice: Boolean(row.show_in_notice),
-    fileType: row.file_type || "pdf",
-    fileName: row.file_name || "",
-    fileUrl: resourceFileProxyUrl(row.id),
+    fileType: first?.type || row.file_type || "pdf",
+    fileName: first?.name || row.file_name || "",
+    fileUrl: first?.fileUrl || resourceFileProxyUrl(row.id, 0),
+    files,
   };
 }
 
 function mapMockResource(item) {
+  const files = normalizeFilesFromRow({
+    id: item.id,
+    files: item.files,
+    file_path: item.sourceUrl ? "mock" : "",
+    file_name: item.fileName,
+    file_type: item.fileType,
+    sourceUrl: item.sourceUrl,
+  });
+
+  // mock: preserve sourceUrl via API mock branch; proxy still used on client
+  const first = files[0] || null;
   return {
     id: item.id,
     title: item.title || "",
@@ -40,9 +98,19 @@ function mapMockResource(item) {
     views: item.views ?? 0,
     isNotice: Boolean(item.isNotice),
     showInNotice: Boolean(item.showInNotice),
-    fileType: item.fileType || "pdf",
-    fileName: item.fileName || "",
-    fileUrl: resourceFileProxyUrl(item.id),
+    fileType: first?.type || item.fileType || "pdf",
+    fileName: first?.name || item.fileName || "",
+    fileUrl: first?.fileUrl || resourceFileProxyUrl(item.id, 0),
+    files:
+      files.length > 0
+        ? files
+        : [
+            {
+              name: item.fileName || "attachment",
+              type: item.fileType || "pdf",
+              fileUrl: resourceFileProxyUrl(item.id, 0),
+            },
+          ],
   };
 }
 

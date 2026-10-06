@@ -5,3 +5,7 @@ export const ANGEL_ROBOTICS_HOMEPAGE_LABEL = "엔젤로보틱스 홈페이지";
 
 export const PEDIATRIC_SITE_DESCRIPTION =
   "엔젤로보틱스 소아 보행 재활 로봇 개발 자문단 포털입니다.";
+export const ANGEL_ROBOTICS_HOMEPAGE_DESCRIPTION =
+  "엔젤로보틱스 홈페이지입니다.";
+
+export const ANGEL_ROBOTICS_HOMEPAGE_GOOGLE_VERIFICATION = "wK3k_n5bOLVrpAKWCYw-uSsjKA06_WBHGjPPecdbyrE";

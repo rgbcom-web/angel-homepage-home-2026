@@ -33,6 +33,43 @@ function inlineHeaders({ contentType, fileName }) {
   };
 }
 
+function resolveFileType(name = "", type = "") {
+  if (type === "image" || type === "pdf") return type;
+  const lower = String(name || "").toLowerCase();
+  if (/\.(png|jpe?g|gif|webp|svg)$/.test(lower)) return "image";
+  return "pdf";
+}
+
+function normalizeFiles(row) {
+  let files = [];
+  if (Array.isArray(row?.files) && row.files.length) {
+    files = row.files.filter((f) => f?.path);
+  } else if (typeof row?.files === "string") {
+    try {
+      const parsed = JSON.parse(row.files);
+      if (Array.isArray(parsed)) files = parsed.filter((f) => f?.path);
+    } catch {
+      files = [];
+    }
+  }
+  if (!files.length && row?.file_path) {
+    files = [
+      {
+        path: row.file_path,
+        name: row.file_name || "",
+        type: row.file_type || "pdf",
+        bucket: row.bucket,
+      },
+    ];
+  }
+  return files.map((file) => ({
+    path: file.path,
+    name: file.name || "",
+    type: resolveFileType(file.name || file.path, file.type),
+    bucket: file.bucket || BUCKET_NAME,
+  }));
+}
+
 async function requireApprovedMember() {
   const session = await getPediatricSession();
   if (!session) return null;
@@ -41,39 +78,76 @@ async function requireApprovedMember() {
   return member;
 }
 
-async function loadResourceMeta(id) {
+async function loadResourceMeta(id, index = 0) {
   try {
     const supa = await createAdminClient();
-    const { data, error } = await supa
+    let data = null;
+    let error = null;
+
+    ({ data, error } = await supa
       .from("advisory_resources")
-      .select("id, file_path, file_name, file_type")
+      .select("id, file_path, file_name, file_type, files")
       .eq("id", id)
-      .maybeSingle();
+      .maybeSingle());
+
+    // files 컬럼이 없거나 schema cache 이슈면 레거시 컬럼만으로 재시도
+    if (error && /files|schema cache|column/i.test(String(error.message || ""))) {
+      console.warn("[resource file] files column select failed, fallback:", error.message);
+      ({ data, error } = await supa
+        .from("advisory_resources")
+        .select("id, file_path, file_name, file_type")
+        .eq("id", id)
+        .maybeSingle());
+    }
+
     if (!error && data) {
+      const files = normalizeFiles(data);
+      const selected = files[index] || files[0];
+      if (!selected) return null;
       return {
         id: data.id,
-        filePath: data.file_path || "",
-        fileName: data.file_name || "",
-        fileType: data.file_type || "pdf",
+        filePath: selected.path || "",
+        fileName: selected.name || "",
+        fileType: selected.type || "pdf",
+        bucket: selected.bucket || BUCKET_NAME,
         source: "supabase",
       };
     }
-  } catch {
-    // fall through to mock
+
+    if (error) {
+      console.error("[resource file] meta query", error);
+    }
+  } catch (error) {
+    console.error("[resource file] meta", error);
   }
 
   const mock = getResourceById(id);
   if (!mock) return null;
+
+  const mockFiles =
+    Array.isArray(mock.files) && mock.files.length
+      ? mock.files
+      : [
+          {
+            sourceUrl: mock.sourceUrl,
+            name: mock.fileName,
+            type: mock.fileType,
+          },
+        ];
+  const selected = mockFiles[index] || mockFiles[0];
+  if (!selected) return null;
+
   return {
     id: mock.id,
-    filePath: mock.sourceUrl || "",
-    fileName: mock.fileName || "",
-    fileType: mock.fileType || "pdf",
+    filePath: selected.sourceUrl || selected.path || mock.sourceUrl || "",
+    fileName: selected.name || selected.fileName || mock.fileName || "",
+    fileType: selected.type || selected.fileType || mock.fileType || "pdf",
+    bucket: BUCKET_NAME,
     source: "mock",
   };
 }
 
-export async function GET(_request, { params }) {
+export async function GET(request, { params }) {
   const member = await requireApprovedMember();
   if (!member) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -84,7 +158,10 @@ export async function GET(_request, { params }) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const meta = await loadResourceMeta(id);
+  const { searchParams } = new URL(request.url);
+  const index = Math.max(0, Number(searchParams.get("index") || 0) || 0);
+
+  const meta = await loadResourceMeta(id, index);
   if (!meta?.filePath) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
@@ -115,14 +192,19 @@ export async function GET(_request, { params }) {
       return NextResponse.json({ error: "Storage not configured" }, { status: 500 });
     }
 
+    const preferBucket = meta.bucket || BUCKET_NAME;
     const supa = await createAdminClient();
     let data = null;
     let error = null;
 
-    ({ data, error } = await supa.storage.from(BUCKET_NAME).download(meta.filePath));
+    ({ data, error } = await supa.storage.from(preferBucket).download(meta.filePath));
 
     // 이전 public 버킷에 남아 있는 파일 호환
-    if ((error || !data) && LEGACY_BUCKET_NAME && LEGACY_BUCKET_NAME !== BUCKET_NAME) {
+    if (
+      (error || !data) &&
+      LEGACY_BUCKET_NAME &&
+      LEGACY_BUCKET_NAME !== preferBucket
+    ) {
       ({ data, error } = await supa.storage
         .from(LEGACY_BUCKET_NAME)
         .download(meta.filePath));

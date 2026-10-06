@@ -6,7 +6,6 @@ import { cn } from "@/shared/lib/utils";
 import { createContext, use, useState } from "react";
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
   DialogFooter,
@@ -26,8 +25,12 @@ export function FormResultDialog({ children, onClose, tag, title, description })
 
   return (
     <FormResultDialogContext value={{ submitResult, setSubmitResult }}>
-      <Dialog open={submitResult} onOpenChange={setSubmitResult}>
-        {children}
+      {children}
+      <Dialog
+        open={!!submitResult}
+        onOpenChange={(open) => {
+          if (!open) setSubmitResult(null);
+        }}>
         <FormResultDialogContent
           onClose={onClose}
           tag={tag}
@@ -65,17 +68,21 @@ export function FormResultDialogContent({
 
   const handleDialogClose = async (e) => {
     e.preventDefault();
+    const result = submitResult;
     setSubmitResult(null);
-    onClose && onClose(submitResult);
+    onClose && onClose(result);
   };
 
   return (
     <DialogContent
       className={{
-        container: cn("max-w-sm"),
+        container: cn("z-[210] max-w-sm"),
         content: cn("space-y-10 !p-6 !pt-8"),
       }}
-      hideClose>
+      overlayClassName={cn("z-[205]")}
+      hideClose
+      onPointerDownOutside={(e) => e.preventDefault()}
+      onEscapeKeyDown={(e) => e.preventDefault()}>
       <DialogHeader className={cn("!gap-0 space-y-3 text-center tablet:space-y-2")}>
         <DialogTitle className={cn("text-xl")}>
           <span className={cn("mb-[0.5em] block text-sm text-dd-blue")}>
@@ -84,7 +91,7 @@ export function FormResultDialogContent({
           {success ? title.success : title.failed}
         </DialogTitle>
         <DialogDescription className={cn("text-base text-black")}>
-          {success ? description.success : description.failed}
+          {success ? description.success : message || description.failed}
         </DialogDescription>
       </DialogHeader>
       <DialogFooter className={cn("justify-center")}>

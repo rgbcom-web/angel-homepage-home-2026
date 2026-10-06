@@ -20,6 +20,7 @@ import { defaultValues, formScheme } from "./scheme";
 import { createRequest } from "./api/request";
 import { uploadFileToStorageClient } from "@/service/api/upload-file-to-storage-client";
 import { PolicyAgreement } from "./policy-agreement";
+import { FormSubmittingOverlay } from "@/features/form/ui/form-submitting-overlay";
 
 export function RecruitApplyForm() {
   return (
@@ -61,32 +62,44 @@ function ContactFormBody() {
   });
 
   const onSubmit = async (data) => {
-    const uploadResultData = await uploadFileToStorageClient(data, tableName);
+    try {
+      const uploadResultData = await uploadFileToStorageClient(data, tableName);
 
-    // mailer에서 파일 첨부를 위해 files 데이터를 추가해야함.
-    const { success, errors } = await createRequest(
-      { ...uploadResultData, files: data.files },
-      tableName,
-    );
-
-    if (!success) {
-      setFieldErrors(form, errors);
-
-      if (errors.message) {
-        setSubmitResult({ success: false, message: errors.message });
+      if (!uploadResultData?.attachments?.length) {
+        setSubmitResult({
+          success: false,
+          message: "파일 업로드에 실패했습니다. 다시 시도해주세요.",
+        });
+        return;
       }
 
-      return;
-    }
+      // 대용량 File은 서버로 재전송하지 않고, 업로드된 메타데이터만 전달
+      const { success, errors } = await createRequest(uploadResultData, tableName);
 
-    form.reset();
-    setSubmitResult({ success: true });
-    return;
+      if (!success) {
+        setFieldErrors(form, errors);
+        setSubmitResult({
+          success: false,
+          message: errors?.message || "지원서 접수 중 오류가 발생했습니다.",
+        });
+        return;
+      }
+
+      form.reset();
+      setSubmitResult({ success: true });
+    } catch (error) {
+      console.error(error);
+      setSubmitResult({
+        success: false,
+        message: error?.message || "지원서 접수 중 오류가 발생했습니다.",
+      });
+    }
   };
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className={cn("text-lg", "tablet:text-base")}>
+        <FormSubmittingOverlay />
         <FormTitle>아래 양식을 통해 이력서를 등록해 주세요.</FormTitle>
         <FormSheet>
           <FormSheetRow

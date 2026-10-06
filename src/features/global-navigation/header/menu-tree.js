@@ -13,6 +13,10 @@ export const MENU_TREE = {
           href: "/company/technology",
         },
         {
+          title: "Physical AI Platform",
+          href: "/company/physical-ai-platform",
+        },
+        {
           title: "뉴스룸",
           href: "/company/newsroom",
         },
@@ -49,11 +53,6 @@ export const MENU_TREE = {
         {
           title: "GEAR",
           href: "/products/angel-gear/brand",
-          childs: [],
-        },
-        {
-          title: "KIT",
-          href: "/products/angel-kit/brand",
           childs: [],
         },
       ],
@@ -135,6 +134,10 @@ export const MENU_TREE = {
           href: "/company/technology",
         },
         {
+          title: "Physical AI Platform",
+          href: "/company/physical-ai-platform",
+        },
+        {
           title: "Newsroom",
           href: "/company/newsroom",
         },
@@ -171,11 +174,6 @@ export const MENU_TREE = {
         {
           title: "GEAR",
           href: "/products/angel-gear/brand",
-          childs: [],
-        },
-        {
-          title: "KIT",
-          href: "/products/angel-kit/brand",
           childs: [],
         },
       ],

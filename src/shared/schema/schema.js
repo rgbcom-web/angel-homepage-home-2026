@@ -96,7 +96,7 @@ export function filesFieldSchema(fields) {
         typeof size === "object"
           ? size.message
           : `파일 크기는 ${sizeValue}MB 이하로 업로드해주세요.`;
-      const sizeCheck = (file) => file === null || file.size <= sizeValue * 1024 * 1024;
+      const sizeCheck = (file) => !file || file.size <= sizeValue * 1024 * 1024;
       fileSchema = fileSchema.refine(sizeCheck, { message: sizeMessage });
     }
 
@@ -106,26 +106,30 @@ export function filesFieldSchema(fields) {
         ? `${extentionsValue.join(", ")} 확장자만 업로드 할 수 있습니다.`
         : extentions.message;
       const extensionCheck = (file) =>
-        file === null || extentionsValue.includes(file.name.split(".").pop().toLowerCase());
+        !file || extentionsValue.includes(file.name.split(".").pop().toLowerCase());
       fileSchema = fileSchema.refine(extensionCheck, { message: extensionMessage });
     }
 
     if (isArray) {
-      let arraySchema = z.array(z.union([fileSchema, z.null()]));
+      // RHF 다중 FileInput은 빈 슬롯을 undefined로 두므로 null/undefined 모두 허용
+      let arraySchema = z.array(z.union([fileSchema, z.null(), z.undefined()]));
 
       // requiredLimit이 설정된 경우 필수 파일 수 검증
       if (requiredLimit) {
-        arraySchema = arraySchema.refine(
-          (files) => {
-            // null이 아닌 파일 수 계산
-            const validFiles = files.filter((file) => file !== null);
-            return validFiles.length >= requiredLimit;
-          },
-          { message: `최소 ${requiredLimit}개의 파일을 업로드해주세요.` },
-        );
-      }
+        const hasRequiredFiles = (files) => {
+          if (!Array.isArray(files)) return false;
+          const validFiles = files.filter((file) => file != null);
+          return validFiles.length >= requiredLimit;
+        };
 
-      schemaObject[key] = z.union([arraySchema, z.null(), z.undefined()]);
+        schemaObject[key] = z
+          .union([arraySchema, z.null(), z.undefined()])
+          .refine(hasRequiredFiles, {
+            message: `최소 ${requiredLimit}개의 파일을 업로드해주세요.`,
+          });
+      } else {
+        schemaObject[key] = z.union([arraySchema, z.null(), z.undefined()]);
+      }
     } else {
       schemaObject[key] = z.union([fileSchema, z.null(), z.undefined()]);
     }

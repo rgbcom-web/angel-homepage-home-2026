@@ -66,27 +66,50 @@ const createTransporter = async () => {
 export async function sendmail(to, subject, html, attachments = [], options = {}) {
   try {
     const { transporter, smtpData } = await createTransporter();
+    const supa = await createAdminClient();
+    const bucket = process.env.NEXT_PUBLIC_SUPABASE_STORAGE_BUCKET;
 
     // 발신자 이름: 함수 호출 시 제공된 이름 > DB 설정 > 기본값 순으로 사용
     const senderName = options.senderName || smtpData.sender_name || "Angel Robotics";
     const fromEmail = smtpData.smtp_user;
 
-    // File 객체를 nodemailer 형식으로 변환
-    const processedAttachments = await Promise.all(
-      (attachments || []).filter(Boolean).map(async (file) => {
-        // File 객체인 경우 처리
-        if (file instanceof File) {
-          const buffer = await file.arrayBuffer();
-          return {
-            filename: file.name,
-            content: Buffer.from(buffer),
-            contentType: file.type,
-          };
-        }
+    // File 객체 또는 스토리지 업로드 메타데이터를 nodemailer 형식으로 변환
+    const processedAttachments = (
+      await Promise.all(
+        (attachments || []).filter(Boolean).map(async (file) => {
+          if (file instanceof File) {
+            const buffer = await file.arrayBuffer();
+            return {
+              filename: file.name,
+              content: Buffer.from(buffer),
+              contentType: file.type,
+            };
+          }
 
-        return file;
-      }),
-    );
+          // 클라이언트에서 이미 업로드된 스토리지 파일
+          if (file?.filePath) {
+            try {
+              const { data, error } = await supa.storage.from(bucket).download(file.filePath);
+
+              if (error || !data) {
+                console.error("메일 첨부 다운로드 실패:", file.filePath, error);
+                return null;
+              }
+
+              return {
+                filename: file.originalName || file.filePath.split("/").pop(),
+                content: Buffer.from(await data.arrayBuffer()),
+              };
+            } catch (downloadError) {
+              console.error("메일 첨부 다운로드 오류:", file.filePath, downloadError);
+              return null;
+            }
+          }
+
+          return file;
+        }),
+      )
+    ).filter(Boolean);
 
     const mailData = {
       from: `${senderName} <${fromEmail}>`,

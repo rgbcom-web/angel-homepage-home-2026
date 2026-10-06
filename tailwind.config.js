@@ -9,17 +9,17 @@ module.exports = {
           max: "1649px",
         },
         "labtop-only": {
-          min: "1400px",
+          min: "1450px",
         },
         tablet: {
-          max: "1399px",
+          max: "1449px",
         },
         "tablet-only": {
-          max: "1399px",
-          min: "769px",
+          max: "1449px",
+          min: "768px",
         },
         mobile: {
-          max: "768px",
+          max: "767px",
         },
         "mobile-sm": {
           max: "479px",

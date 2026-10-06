@@ -14,18 +14,7 @@ export async function sendAlimMail({ tableName, mailSubject, mailBody, attachmen
     .eq("table_id", tableName)
     .single();
 
-  if (mailRecipientError || !mailRecipient) {
-    throw new Error(
-      mailRecipientError?.message ||
-        `알림메일 수신자가 없습니다. (table_id: ${tableName})`,
-    );
-  }
-
   const to = mailRecipient.email;
-  if (!to || (Array.isArray(to) && to.length === 0)) {
-    throw new Error(`알림메일 수신자 이메일이 비어 있습니다. (table_id: ${tableName})`);
-  }
-
   const sendmailResult = await sendmail(to, mailSubject, mailBody, attachments);
 
   return sendmailResult;

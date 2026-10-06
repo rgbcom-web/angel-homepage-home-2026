@@ -3,8 +3,32 @@
 import Link from "next/link";
 import { ArrowLeft, Lock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import CKContent from "@/shared/components/ck-editor/ck-content";
 import { PortalContentFrame } from "../portal-ui";
 import { SecureFileViewer } from "./secure-file-viewer";
+
+function looksLikeHtml(value = "") {
+  return /<[a-z][\s\S]*>/i.test(String(value));
+}
+
+function ResourceDescription({ description }) {
+  if (!description) return null;
+
+  if (looksLikeHtml(description)) {
+    return (
+      <CKContent
+        content={description}
+        className={cn("mt-3 text-sm leading-relaxed text-[#334155]")}
+      />
+    );
+  }
+
+  return (
+    <p className={cn("mt-2 whitespace-pre-wrap text-sm leading-relaxed text-[#64748B]")}>
+      {description}
+    </p>
+  );
+}
 
 export function ResourceDetailPage({ resource }) {
   if (!resource) {
@@ -44,9 +68,7 @@ export function ResourceDetailPage({ resource }) {
         <h1 className={cn("text-2xl font-bold text-[#0F172A]", "mobile:text-xl")}>
           {resource.title}
         </h1>
-        {resource.description && (
-          <p className={cn("mt-2 text-sm text-[#64748B]")}>{resource.description}</p>
-        )}
+        <ResourceDescription description={resource.description} />
       </div>
 
       <SecureFileViewer resource={resource} />

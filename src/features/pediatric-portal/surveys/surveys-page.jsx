@@ -139,7 +139,11 @@ export function SurveysPage({ surveys = [], source = "mock", fetchError = null }
 
                 return (
                   <li key={item.id}>
-                    {canOpenForm ? (
+                    {/* 폼으로 바로 이동 X -> 기본적으로 설문 상세페이지로 이동하도록 수정 */}
+                    <Link href={`/pediatric/surveys/${item.id}`} className={rowClass}>
+                      {rowContent}
+                    </Link>
+                    {/* {canOpenForm ? (
                       <a
                         href={formUrl}
                         target="_blank"
@@ -151,7 +155,7 @@ export function SurveysPage({ surveys = [], source = "mock", fetchError = null }
                       <Link href={`/pediatric/surveys/${item.id}`} className={rowClass}>
                         {rowContent}
                       </Link>
-                    )}
+                    )} */}
                   </li>
                 );
               })}

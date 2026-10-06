@@ -151,10 +151,15 @@ export function ResourcesPage({ resources = [], source = "mock", fetchError = nu
                         <span className={CELL_CENTER}>{number}</span>
                         <span
                           className={cn(
-                            "truncate px-4 text-base font-medium text-[#1E293B]",
+                            "flex min-w-0 items-center gap-2 truncate px-4 text-base font-medium text-[#1E293B]",
                             "mobile:px-2 mobile:text-sm",
                           )}>
-                          {item.title}
+                          {item.isNotice && (
+                            <span className="shrink-0 rounded bg-[#2563EB] px-1.5 py-0.5 text-[11px] font-bold text-white">
+                              공지
+                            </span>
+                          )}
+                          <span className="truncate">{item.title}</span>
                         </span>
                         <span className={cn(CELL_CENTER, "whitespace-nowrap mobile:px-1 mobile:text-[11px]")}>
                           {formatResourceDate(item.date)}

@@ -1,41 +1,58 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createAdminClient } from "@/service/db/supabase/server";
 import { z } from "zod";
 import { transformZodErrors } from "@/shared/lib/validation.utils";
 import { formScheme } from "../scheme";
 import { sendAlimMail } from "@/features/form/send-alim-mail";
 
+// 클라이언트에서 스토리지 업로드 후 메타데이터만 전달하므로 File 필드는 제외
+const serverFormScheme = formScheme.omit({ files: true }).extend({
+  attachments: z
+    .array(
+      z.object({
+        originalName: z.string(),
+        filePath: z.string(),
+        deleted: z.boolean().optional(),
+      }),
+    )
+    .min(1, { message: "최소 1개의 파일을 업로드해주세요." }),
+});
+
 export async function createRequest(formData, tableName, pathToRevalidate) {
   try {
-    // 유효성 검사
-    const validationResult = formScheme.safeParse(formData);
+    const validationResult = serverFormScheme.safeParse(formData);
     if (!validationResult.success) {
       throw validationResult.error;
     }
 
-    const { files, ...toInsertData } = validationResult.data;
+    const toInsertData = validationResult.data;
 
     const supa = await createAdminClient();
 
-    const query = supa.from(tableName).insert({
-      ...toInsertData,
-    });
-
-    const { error } = await query.select("*").single();
+    const { error } = await supa
+      .from(tableName)
+      .insert({
+        ...toInsertData,
+      })
+      .select("*")
+      .single();
 
     if (error) {
       throw error;
     }
 
-    const sendAlimMailResult = await sendAlimMail({
+    // 메일 발송은 비동기로 처리 — 대용량 첨부/SMTP 지연이 접수 응답을 막지 않도록 함
+    void sendAlimMail({
       tableName,
       mailSubject: `[상시채용] ${validationResult.data.name}님의 상시채용지원이 접수되었습니다.`,
       mailBody: getMailBody(validationResult.data),
-      attachments: files.attachments,
+      attachments: validationResult.data.attachments,
+    }).catch((mailError) => {
+      console.error("상시채용 알림 메일 발송 실패:", mailError);
     });
 
-    // 페이지 리렌더링
     pathToRevalidate && revalidatePath(pathToRevalidate);
 
     return {
@@ -121,15 +138,6 @@ function getMailBody(data) {
           답장하기
         </a>
       </div>
-      
-      <!-- 알림 -->
-      <!--
-      <div style="margin-top: 30px; background-color: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; border-radius: 4px; font-size: 14px; color: #92400e;">
-        <p style="margin: 0;">
-          <strong>참고:</strong> 문의는 48시간 이내 답변을 원칙으로 합니다. 긴급 문의는 우선적으로 처리해 주세요.
-        </p>
-      </div>
-      -->
     </div>
     
     <!-- 푸터 -->

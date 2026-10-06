@@ -87,7 +87,6 @@ strong, b {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
 }
-
 /* Pediatric KOL Portal - 보안 뷰어 인쇄 제한 */
 @media print {
   body.pediatric-secure-viewer * {

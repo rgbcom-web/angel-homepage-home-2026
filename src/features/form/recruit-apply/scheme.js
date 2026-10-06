@@ -9,7 +9,7 @@ export const defaultValues = {
   content: "",
   attachments: null,
   files: {
-    attachments: null,
+    attachments: [null, null, null],
   },
   privacy_required: false,
   privacy_optional: false,

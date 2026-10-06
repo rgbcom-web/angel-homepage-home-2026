@@ -21,6 +21,10 @@ const mainThemePath = {
       exact: true,
     },
     {
+      path: "/company/physical-ai-platform",
+      exact: true,
+    },
+    {
       path: "/products",
       exact: false,
     },
