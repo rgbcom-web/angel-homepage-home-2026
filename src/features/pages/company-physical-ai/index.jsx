@@ -145,7 +145,8 @@ const platformContent = {
     },
     bannerTitle: (
       <>
-        <span className="text-white">onephai</span>, an integrated platform connecting <Br pc tablet />
+        <span className="text-white">onephai</span>, an integrated platform connecting{" "}
+        <Br pc tablet />
         robotics and AI to bring Physical AI to life
       </>
     ),
@@ -170,14 +171,16 @@ function ProductRow({ product }) {
   return (
     <article
       className={cn(
-        "grid grid-cols-2 items-center gap-[64px]",
-        "tablet:gap-10",
+        "grid items-center gap-[62px]",
+        product.reverse ? "grid-cols-[612px_560px]" : "grid-cols-[560px_612px]",
+        "tablet:grid-cols-2 tablet:gap-10",
         "mobile:grid-cols-1 mobile:gap-7",
       )}>
       <div
         className={cn(
-          "relative aspect-[7/5] overflow-hidden rounded-[13px] bg-[#202126]",
+          "relative h-[400px] w-[560px] overflow-hidden rounded-[13px] bg-[#202126]",
           product.reverse && "order-2",
+          "tablet:h-auto tablet:w-full tablet:aspect-[7/5]",
           "mobile:order-1",
         )}>
         <Image
@@ -195,11 +198,13 @@ function ProductRow({ product }) {
           "tablet:pt-12",
           "mobile:order-2 mobile:h-auto mobile:pt-8",
         )}>
-        <p className="text-[20px] font-semibold text-[#427DFF] mobile:text-base">{product.number}</p>
+        <p className="text-[20px] font-semibold text-[#427DFF] mobile:text-base">
+          {product.number}
+        </p>
         <h3 className="mt-[16px] text-[36px] font-bold tracking-[-0.03em] mobile:mt-3 mobile:text-3xl">
           {product.name}
         </h3>
-        <p className="mt-5 text-[20px]/[1.75] font-light text-[#BFBFBF] tablet:text-lg/[1.7] [&_strong]:text-[#427DFF] mobile:mt-4 mobile:text-base/[1.7]">
+        <p className="mt-5 text-[20px]/[1.75] font-light text-[#BFBFBF] tablet:text-lg/[1.7] mobile:mt-4 mobile:text-base/[1.7] [&_strong]:text-[#427DFF]">
           {product.description}
         </p>
       </div>
@@ -213,7 +218,7 @@ function PlatformSection({ title, children }) {
       <h2 className="text-center text-[50px]/[1.2] font-bold tablet:text-[42px] mobile:text-[28px]/[1.3]">
         {title}
       </h2>
-      <div className="mt-[76px] space-y-[120px] tablet:mt-16 tablet:space-y-24 mobile:mt-10 mobile:space-y-20">
+      <div className="mt-[120px] space-y-[120px] tablet:mt-16 tablet:space-y-24 mobile:mt-10 mobile:space-y-20">
         {children}
       </div>
     </section>
@@ -257,14 +262,13 @@ export function PhysicalAIPlatform({ lang }) {
       </section>
 
       <div className="py-[150px] tablet:py-[120px] mobile:py-[90px]">
-        <Container width="narrow">
+        <Container width="narrow" className="w-[1234px]">
           <PlatformSection
             title={
               <>
                 <span className="text-[#427DFF]">TECHNOLOGY</span> PLATFORM
               </>
-            }
-          >
+            }>
             {content.products.map((product) => (
               <ProductRow key={product.name} product={product} />
             ))}
@@ -276,8 +280,7 @@ export function PhysicalAIPlatform({ lang }) {
                 <>
                   <span className="text-[#427DFF]">WEARABLE ROBOT</span> PLATFORM
                 </>
-              }
-            >
+              }>
               <ProductRow product={content.wearable} />
             </PlatformSection>
           </div>
